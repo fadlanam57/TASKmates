@@ -1,6 +1,7 @@
 import os
 import re
 import sqlite3
+from pathlib import Path
 
 try:
     import psycopg2
@@ -9,8 +10,28 @@ except ImportError:
     psycopg2 = None
     DictCursor = None
 
-# Lokasi file taskmate.db lokal (berada di root project)
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'taskmate.db')
+# Menentukan BASE_DIR absolut agar aman di semua OS dan environment
+BASE_DIR = Path(__file__).resolve().parent
+
+# Konfigurasi path database SQLite:
+# 1. Saat di Vercel / serverless: simpan di /tmp/taskmate.db (writable)
+# 2. Saat di localhost: gunakan taskmate.db di root project
+if os.environ.get("VERCEL"):
+    DB_PATH = Path("/tmp/taskmate.db")
+else:
+    DB_PATH = BASE_DIR / "taskmate.db"
+
+# Pastikan folder tujuan database dibuat jika belum ada
+try:
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    # Jika di Vercel dan /tmp/taskmate.db belum ada, salin dari bundle jika tersedia
+    if os.environ.get("VERCEL") and not DB_PATH.exists():
+        initial_db = BASE_DIR / "taskmate.db"
+        if initial_db.exists():
+            import shutil
+            shutil.copy2(initial_db, DB_PATH)
+except Exception as e:
+    print(f"[TaskMate] Peringatan inisialisasi folder DB_PATH: {e}")
 
 def adapt_query_for_sqlite(query):
     """
@@ -158,17 +179,19 @@ class PostgresConnectionWrapper:
 
 def get_sqlite_connection():
     """
-    Membuka koneksi ke database SQLite lokal (taskmate.db).
+    Membuka koneksi ke database SQLite lokal atau /tmp di Vercel (DB_PATH).
+    Memastikan direktori tujuan database dibuat jika belum ada.
     """
-    conn = sqlite3.connect(DB_PATH)
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(DB_PATH))
     conn.row_factory = sqlite3.Row
     return SQLiteConnectionWrapper(conn)
 
 def get_db_connection():
     """
     Membuka koneksi database:
-    1. Jika DATABASE_URL tersedia (misalnya di Vercel / Cloud), gunakan PostgreSQL.
-    2. Jika DATABASE_URL tidak tersedia (mode lokal), gunakan SQLite (taskmate.db).
+    1. Jika DATABASE_URL tersedia (misalnya PostgreSQL di Supabase / Neon), gunakan PostgreSQL.
+    2. Jika DATABASE_URL tidak tersedia, gunakan SQLite pada DB_PATH (/tmp/taskmate.db di Vercel, taskmate.db di localhost).
     Tidak akan menyebabkan aplikasi error jika DATABASE_URL belum diatur.
     """
     database_url = os.environ.get('DATABASE_URL', '').strip()
@@ -186,7 +209,7 @@ def get_db_connection():
             raw_conn = psycopg2.connect(database_url, cursor_factory=DictCursor)
             return PostgresConnectionWrapper(raw_conn)
         except Exception as e:
-            print(f"[TaskMate] Peringatan: Gagal terhubung ke PostgreSQL ({e}). Beralih ke SQLite lokal.")
+            print(f"[TaskMate] Peringatan: Gagal terhubung ke PostgreSQL ({e}). Beralih ke SQLite ({DB_PATH}).")
             return get_sqlite_connection()
 
     return get_sqlite_connection()
@@ -194,7 +217,7 @@ def get_db_connection():
 def ensure_tables():
     """
     Memastikan semua tabel (tasks, users) telah terbentuk tanpa menghapus data yang ada.
-    Mendukung SQLite lokal maupun PostgreSQL di cloud.
+    Mendukung SQLite lokal / /tmp Vercel maupun PostgreSQL di cloud.
     """
     try:
         conn = get_db_connection()
@@ -253,17 +276,18 @@ def ensure_tables():
             ''')
             conn.commit()
             conn.close()
-            print("[TaskMate] Tabel database SQLite (taskmate.db) berhasil diverifikasi.")
+            print(f"[TaskMate] Tabel database SQLite ({DB_PATH}) berhasil diverifikasi.")
     except Exception as e:
         print(f"[TaskMate] Peringatan saat inisialisasi tabel: {e}")
 
-def init_db():
+def init_database():
     """
     Inisialisasi tabel database dan mengisi data contoh dari schema.sql (jika diperlukan).
+    Menggunakan DB_PATH yang sama untuk koneksi SQLite.
     """
     conn = get_db_connection()
-    schema_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'schema.sql')
-    if os.path.exists(schema_file):
+    schema_file = BASE_DIR / 'schema.sql'
+    if schema_file.exists():
         with open(schema_file, 'r', encoding='utf-8') as f:
             sql_script = f.read()
         is_pg = getattr(conn, 'db_type', 'sqlite') == 'postgres'
@@ -273,8 +297,11 @@ def init_db():
             print("[TaskMate] Database PostgreSQL berhasil diinisialisasi dari schema.sql!")
         else:
             conn._conn.executescript(sql_script)
-            print("[TaskMate] Database SQLite berhasil diinisialisasi dari schema.sql!")
+            print(f"[TaskMate] Database SQLite ({DB_PATH}) berhasil diinisialisasi dari schema.sql!")
     conn.close()
+
+# Alias fungsi untuk kompatibilitas
+init_db = init_database
 
 if __name__ == '__main__':
     ensure_tables()
