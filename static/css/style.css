@@ -91,6 +91,11 @@
     box-sizing: border-box;
 }
 
+html {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: var(--bg-gradient-fixed);
@@ -100,6 +105,7 @@ body {
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
     overflow-x: hidden;
+    max-width: 100vw;
 }
 
 /* ==========================================================================
@@ -465,24 +471,31 @@ body {
 
 /* Workspace Topbar */
 .workspace-topbar {
-    height: 54px;
-    background: rgba(255, 255, 255, 0.90);
+    min-height: 54px;
+    background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(226, 232, 240, 0.85);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px;
+    padding: 8px 20px;
     position: sticky;
     top: 0;
     z-index: 60;
+    box-sizing: border-box;
 }
 
 .topbar-left-group {
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+.topbar-right-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 /* Tombol Toggle Sidebar Universal yang Selalu Terlihat */
@@ -542,15 +555,16 @@ body {
     gap: 6px;
     background-color: var(--surface);
     color: var(--cyan-darker);
-    border: 1px solid var(--cyan-border);
+    border: 1.5px solid var(--cyan-border);
     font-family: inherit;
-    font-size: 0.8rem;
+    font-size: 0.825rem;
     font-weight: 600;
-    padding: 6px 12px;
+    padding: 7px 14px;
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: all 0.15s ease;
-    margin-right: 8px;
+    box-sizing: border-box;
+    margin: 0;
 }
 
 .btn-topbar-auth:hover {
@@ -560,7 +574,7 @@ body {
 }
 
 .workspace-crumb {
-    font-size: 0.825rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-muted);
 }
@@ -568,17 +582,25 @@ body {
 .btn-topbar-add {
     display: none;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     background: linear-gradient(135deg, var(--cyan-primary) 0%, #00adc5 100%);
     color: var(--text-on-cyan);
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
     border: none;
-    padding: 6px 12px;
-    border-radius: var(--radius-sm);
-    font-size: 0.775rem;
+    padding: 7px 14px;
+    border-radius: var(--radius-md);
+    font-size: 0.825rem;
     font-weight: 700;
     cursor: pointer;
     box-shadow: 0 2px 6px var(--cyan-glow);
+    box-sizing: border-box;
+    transition: all 0.15s ease;
+    margin: 0;
+}
+
+.btn-topbar-add:hover {
+    box-shadow: 0 4px 12px var(--cyan-glow);
+    transform: translateY(-1px);
 }
 
 /* Main Content Container (3. Center-Aligned dengan Max-Width 900px Nyaman) */
@@ -2203,29 +2225,84 @@ body {
 .btn-topbar-cal-mobile {
     display: none;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     background-color: var(--surface);
     color: var(--cyan-darker);
-    border: 1px solid var(--cyan-border);
+    border: 1.5px solid var(--cyan-border);
     font-family: inherit;
-    font-size: 0.78rem;
+    font-size: 0.825rem;
     font-weight: 600;
-    padding: 5px 10px;
-    border-radius: var(--radius-sm);
+    padding: 7px 14px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     transition: all 0.15s ease;
-    margin-right: 6px;
+    box-sizing: border-box;
+    margin: 0;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.btn-topbar-cal-mobile:hover {
+.btn-topbar-cal-mobile:hover,
+.btn-topbar-cal-mobile.is-active {
     background-color: var(--cyan-50);
     border-color: var(--cyan-primary);
     color: var(--cyan-deep);
+    box-shadow: 0 0 0 2px var(--cyan-100);
+}
+
+/* Calendar Mobile Backdrop Overlay */
+.calendar-backdrop-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.48);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    z-index: 90;
+    transition: opacity 0.2s ease;
+}
+
+.calendar-backdrop-overlay.is-open {
+    display: block;
+}
+
+/* Calendar Header Close Button */
+.calendar-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-calendar-close {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 1.35rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+}
+
+.btn-calendar-close:hover,
+.btn-calendar-close:active {
+    background-color: #fee2e2;
+    color: #ef4444;
+    border-color: #fca5a5;
 }
 
 /* ==========================================================================
-   RESPONSIVE (LAPTOP & HP)
+   RESPONSIVE (LAPTOP, TABLET & HP)
    ========================================================================== */
+
+/* 1. LAYOUT TABLET & LAPTOP SEDANG (<= 1100px) */
 @media (max-width: 1100px) {
     .sidebar-collapsed .workspace-main {
         margin-right: 0;
@@ -2235,19 +2312,40 @@ body {
         display: none;
     }
 
+    /* Kalender Mode Mobile / Drawer Mengambang */
     .workspace-calendar-panel.mobile-cal-open {
-        display: flex;
-        transform: translateX(0);
-        opacity: 1;
-        z-index: 70;
-        width: 310px;
-        pointer-events: auto;
+        display: flex !important;
+        position: fixed !important;
+        top: 14px !important;
+        right: 14px !important;
+        bottom: 14px !important;
+        left: auto !important;
+        width: calc(100vw - 28px) !important;
+        max-width: 360px !important;
+        max-height: calc(100dvh - 28px) !important;
+        background: #ffffff !important;
+        border: 1px solid rgba(226, 232, 240, 0.95) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.22), 0 4px 12px rgba(15, 23, 42, 0.10) !important;
+        z-index: 95 !important;
+        padding: 18px 16px 20px !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        transform: translateX(0) !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
     }
 
     .btn-topbar-cal-mobile {
         display: inline-flex;
     }
+
+    .btn-calendar-close {
+        display: inline-flex;
+    }
 }
+
+/* 2. LAYOUT TABLET / MENU DRAWER (<= 860px) */
 @media (max-width: 860px) {
     .workspace-footer-minimal {
         left: 16px;
@@ -2256,6 +2354,7 @@ body {
 
     .workspace-sidebar {
         transform: translateX(-100%);
+        z-index: 50;
     }
 
     .workspace-sidebar.is-open {
@@ -2266,7 +2365,9 @@ body {
         display: none;
         position: fixed;
         inset: 0;
-        background-color: rgba(15, 23, 42, 0.4);
+        background-color: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
         z-index: 45;
     }
 
@@ -2295,23 +2396,50 @@ body {
     }
 }
 
-@media (max-width: 600px) {
-    .workspace-content-body {
-        padding: 14px 14px 32px;
-    }
-
+/* 3. LAYOUT RESPONSIVE MOBILE UMUM (481px - 768px) */
+@media (max-width: 768px) {
     .workspace-topbar {
-        padding: 0 14px;
+        min-height: 56px;
+        padding: 10px 16px;
+        gap: 10px 14px;
     }
 
-    .workspace-heading {
-        font-size: 1.3rem;
+    .topbar-right-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 10px;
+    }
+
+    .btn-topbar-cal-mobile,
+    .btn-topbar-auth,
+    .btn-topbar-add {
+        display: inline-flex;
+        min-height: 44px;
+        padding: 8px 14px;
+        font-size: 0.825rem;
+        border-radius: var(--radius-md);
+        box-sizing: border-box;
+    }
+
+    .btn-sidebar-toggle {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .workspace-content-body {
+        padding: 18px 16px 48px;
     }
 
     .header-right-actions {
         display: none;
     }
+}
 
+/* 4. LAYOUT FORM & DAFTAR TUGAS (<= 600px) */
+@media (max-width: 600px) {
     .toolbar-search-filter-form {
         flex-direction: column;
         align-items: stretch;
@@ -2333,11 +2461,8 @@ body {
     }
 
     .task-row-card {
-        padding: 11px 12px;
+        padding: 12px 14px;
         gap: 10px;
-    }
-
-    .task-row-card {
         flex-direction: column;
     }
 
@@ -2353,9 +2478,158 @@ body {
         margin-top: 4px;
     }
 
+    .btn-row-action {
+        width: 34px;
+        height: 34px;
+    }
+
+    .row-status-select {
+        min-height: 34px;
+        font-size: 0.8rem;
+    }
+
     .floating-toast-stack {
         left: 14px;
         right: 14px;
         max-width: none;
+    }
+}
+
+/* 5. LAYOUT MOBILE SMARPHONE (320px - 480px) */
+@media (max-width: 480px) {
+    /* Header/Topbar dengan susunan 2 baris yang lega */
+    .workspace-topbar {
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .topbar-left-group {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: flex-start;
+    }
+
+    .workspace-crumb {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    /* Baris tombol aksi: Kalender, Masuk, Tugas Baru */
+    .topbar-right-group {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* Tombol Kalender dan Masuk berdampingan, Tugas Baru full width di bawahnya */
+    .topbar-right-group .btn-topbar-cal-mobile {
+        flex: 1 1 120px;
+        min-height: 44px;
+        justify-content: center;
+        font-size: 0.825rem;
+    }
+
+    .topbar-right-group .btn-topbar-auth {
+        flex: 1 1 100px;
+        min-height: 44px;
+        justify-content: center;
+        font-size: 0.825rem;
+    }
+
+    .topbar-right-group .btn-topbar-add {
+        flex: 1 1 100%;
+        min-height: 44px;
+        justify-content: center;
+        font-size: 0.85rem;
+    }
+
+    /* Kalender panel responsif pada smartphone */
+    .workspace-calendar-panel.mobile-cal-open {
+        top: 8px !important;
+        right: 8px !important;
+        bottom: 8px !important;
+        width: calc(100vw - 16px) !important;
+        max-width: none !important;
+        max-height: calc(100dvh - 16px) !important;
+        border-radius: 14px !important;
+        padding: 14px 12px 18px !important;
+    }
+
+    .calendar-days-grid {
+        gap: 2px;
+    }
+
+    .calendar-day-cell {
+        font-size: 0.775rem;
+    }
+
+    .calendar-month-label {
+        font-size: 0.875rem;
+    }
+
+    .calendar-panel-title {
+        font-size: 0.875rem;
+    }
+
+    .calendar-panel-subtitle {
+        font-size: 0.7rem;
+    }
+
+    .workspace-content-body {
+        padding: 14px 12px 36px;
+    }
+
+    .workspace-heading {
+        font-size: 1.25rem;
+    }
+
+    .focus-cards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-backdrop-layer {
+        padding: 10px;
+    }
+
+    .modal-dialog-box {
+        max-height: 94vh;
+        border-radius: var(--radius-md);
+    }
+
+    .modal-dialog-header {
+        padding: 12px 14px;
+    }
+
+    .modal-dialog-form {
+        padding: 14px;
+    }
+}
+
+/* 6. LAYOUT EKSTRA KECIL (320px - 360px) */
+@media (max-width: 360px) {
+    .workspace-topbar {
+        padding: 8px 10px;
+    }
+
+    .topbar-right-group .btn-topbar-cal-mobile,
+    .topbar-right-group .btn-topbar-auth,
+    .topbar-right-group .btn-topbar-add {
+        font-size: 0.775rem;
+        padding: 8px 10px;
+        gap: 5px;
+    }
+
+    .workspace-crumb {
+        font-size: 0.8rem;
+    }
+
+    .workspace-content-body {
+        padding: 12px 8px 32px;
     }
 }

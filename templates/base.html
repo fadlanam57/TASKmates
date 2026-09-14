@@ -161,14 +161,16 @@
         </aside>
 
         <!-- Sidebar Backdrop for Mobile -->
-        <div class="sidebar-backdrop-overlay" id="sidebarBackdrop" onclick="toggleSidebarMobile()"></div>
+        <div class="sidebar-backdrop-overlay" id="sidebarBackdrop" onclick="closeSidebarMobile()"></div>
+        <!-- Calendar Backdrop for Mobile -->
+        <div class="calendar-backdrop-overlay" id="calendarBackdrop" onclick="closeCalendarMobile()"></div>
 
         <!-- MAIN APP CONTENT -->
         <div class="workspace-main">
             <!-- Header Topbar (dengan Hamburger universal) -->
             <header class="workspace-topbar">
                 <div class="topbar-left-group">
-                    <button type="button" class="btn-sidebar-toggle" id="topbarSidebarToggle" onclick="toggleSidebar()" title="Tutup Sidebar (Ctrl+B)" aria-label="Toggle Sidebar" aria-expanded="true">
+                    <button type="button" class="btn-sidebar-toggle" id="topbarSidebarToggle" onclick="toggleSidebarUniversal()" title="Buka/Tutup Sidebar" aria-label="Toggle Sidebar" aria-expanded="true">
                         <svg class="toggle-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
                             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -179,7 +181,7 @@
 
                 <div class="topbar-right-group">
                     <!-- Tombol Cepat Kalender (khusus mobile / tablet) -->
-                    <button type="button" class="btn-topbar-cal-mobile" id="btnCalMobile" onclick="toggleCalendarMobile()" title="Lihat Kalender Deadline" aria-label="Buka Kalender">
+                    <button type="button" class="btn-topbar-cal-mobile" id="btnCalMobile" onclick="toggleCalendarMobile()" title="Lihat Kalender Deadline" aria-label="Buka Kalender" aria-expanded="false">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                             <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -258,7 +260,10 @@
                         <span class="calendar-panel-subtitle">Jadwal Tugas Kuliah</span>
                     </div>
                 </div>
-                <button type="button" class="btn-calendar-today" onclick="goToTodayMonth()" title="Kembali ke Bulan Ini">Bulan Ini</button>
+                <div class="calendar-header-actions">
+                    <button type="button" class="btn-calendar-today" onclick="goToTodayMonth()" title="Kembali ke Bulan Ini">Bulan Ini</button>
+                    <button type="button" class="btn-calendar-close" onclick="closeCalendarMobile()" aria-label="Tutup Kalender" title="Tutup Kalender">&times;</button>
+                </div>
             </div>
 
             <!-- Calendar Month Navigation -->
