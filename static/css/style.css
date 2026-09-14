@@ -2221,9 +2221,10 @@ body {
     font-style: italic;
 }
 
-/* Tombol Kalender di Topbar (Mobile) */
+/* Tombol Kalender di Topbar (Universal & Mobile) */
+.btn-topbar-cal,
 .btn-topbar-cal-mobile {
-    display: none;
+    display: inline-flex;
     align-items: center;
     gap: 6px;
     background-color: var(--surface);
@@ -2239,8 +2240,15 @@ body {
     box-sizing: border-box;
     margin: 0;
     -webkit-tap-highlight-color: transparent;
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 10;
+    touch-action: manipulation;
+    user-select: none;
 }
 
+.btn-topbar-cal:hover,
+.btn-topbar-cal.is-active,
 .btn-topbar-cal-mobile:hover,
 .btn-topbar-cal-mobile.is-active {
     background-color: var(--cyan-50);
@@ -2249,20 +2257,49 @@ body {
     box-shadow: 0 0 0 2px var(--cyan-100);
 }
 
-/* Calendar Mobile Backdrop Overlay */
+/* Pastikan svg dan teks di dalam tombol kalender & close tidak memblokir event sentuhan */
+.btn-topbar-cal *,
+.btn-topbar-cal-mobile *,
+.btn-calendar-close *,
+.btn-sidebar-toggle * {
+    pointer-events: none;
+}
+
+/* Backdrops Overlay Universal (Sidebar & Kalender) */
+.sidebar-backdrop-overlay,
 .calendar-backdrop-overlay {
-    display: none;
+    display: none !important;
     position: fixed;
     inset: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 990;
+    pointer-events: none !important;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.sidebar-backdrop-overlay {
+    background-color: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+
+.calendar-backdrop-overlay {
     background-color: rgba(15, 23, 42, 0.48);
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
-    z-index: 90;
-    transition: opacity 0.2s ease;
 }
 
+/* Status aktif untuk overlay: hanya menangkap sentuhan saat aktif */
+.sidebar-backdrop-overlay.is-open,
 .calendar-backdrop-overlay.is-open {
-    display: block;
+    display: block !important;
+    pointer-events: auto !important;
+    opacity: 1;
+    visibility: visible;
 }
 
 /* Calendar Header Close Button */
@@ -2276,19 +2313,22 @@ body {
     display: none;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
-    min-width: 34px;
-    min-height: 34px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
     background: var(--surface);
     color: var(--text-secondary);
-    font-size: 1.35rem;
+    font-size: 1.5rem;
     line-height: 1;
     cursor: pointer;
     transition: all 0.15s ease;
     padding: 0;
+    pointer-events: auto !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .btn-calendar-close:hover,
@@ -2326,22 +2366,24 @@ body {
         background: #ffffff !important;
         border: 1px solid rgba(226, 232, 240, 0.95) !important;
         border-radius: 16px !important;
-        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.22), 0 4px 12px rgba(15, 23, 42, 0.10) !important;
-        z-index: 95 !important;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.25), 0 4px 12px rgba(15, 23, 42, 0.12) !important;
+        z-index: 1000 !important;
         padding: 18px 16px 20px !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
         transform: translateX(0) !important;
         opacity: 1 !important;
         pointer-events: auto !important;
+        visibility: visible !important;
     }
 
-    .btn-topbar-cal-mobile {
-        display: inline-flex;
+    .btn-topbar-cal-mobile,
+    .btn-topbar-cal {
+        display: inline-flex !important;
     }
 
     .btn-calendar-close {
-        display: inline-flex;
+        display: inline-flex !important;
     }
 }
 
@@ -2354,25 +2396,21 @@ body {
 
     .workspace-sidebar {
         transform: translateX(-100%);
-        z-index: 50;
+        z-index: 1000;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        height: 100%;
+        height: 100dvh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .workspace-sidebar.is-open {
         transform: translateX(0);
-    }
-
-    .sidebar-backdrop-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background-color: rgba(15, 23, 42, 0.45);
-        backdrop-filter: blur(2px);
-        -webkit-backdrop-filter: blur(2px);
-        z-index: 45;
-    }
-
-    .sidebar-backdrop-overlay.is-open {
-        display: block;
+        z-index: 1000;
+        box-shadow: 8px 0 28px rgba(15, 23, 42, 0.22);
     }
 
     .workspace-main {
@@ -2381,10 +2419,6 @@ body {
 
     .btn-menu-drawer {
         display: block;
-    }
-
-    .btn-topbar-add {
-        display: inline-flex;
     }
 
     .sidebar-close-btn {
@@ -2411,15 +2445,19 @@ body {
         gap: 8px 10px;
     }
 
+    .btn-topbar-cal,
     .btn-topbar-cal-mobile,
-    .btn-topbar-auth,
-    .btn-topbar-add {
-        display: inline-flex;
+    .btn-topbar-auth {
+        display: inline-flex !important;
         min-height: 44px;
+        min-width: 44px;
         padding: 8px 14px;
         font-size: 0.825rem;
         border-radius: var(--radius-md);
         box-sizing: border-box;
+        pointer-events: auto !important;
+        touch-action: manipulation;
+        user-select: none;
     }
 
     .btn-sidebar-toggle {
@@ -2427,6 +2465,8 @@ body {
         height: 44px;
         min-width: 44px;
         min-height: 44px;
+        pointer-events: auto !important;
+        touch-action: manipulation;
     }
 
     .workspace-content-body {
@@ -2519,7 +2559,7 @@ body {
         color: var(--text-primary);
     }
 
-    /* Baris tombol aksi: Kalender, Masuk, Tugas Baru */
+    /* Baris tombol aksi: Kalender & Masuk */
     .topbar-right-group {
         width: 100%;
         display: flex;
@@ -2527,26 +2567,26 @@ body {
         gap: 8px;
     }
 
-    /* Tombol Kalender dan Masuk berdampingan, Tugas Baru full width di bawahnya */
+    /* Tombol Kalender dan Masuk responsif */
+    .topbar-right-group .btn-topbar-cal,
     .topbar-right-group .btn-topbar-cal-mobile {
-        flex: 1 1 120px;
+        flex: 1 1 auto;
         min-height: 44px;
+        min-width: 44px;
         justify-content: center;
         font-size: 0.825rem;
+        pointer-events: auto !important;
+        touch-action: manipulation;
     }
 
     .topbar-right-group .btn-topbar-auth {
-        flex: 1 1 100px;
+        flex: 1 1 auto;
         min-height: 44px;
+        min-width: 44px;
         justify-content: center;
         font-size: 0.825rem;
-    }
-
-    .topbar-right-group .btn-topbar-add {
-        flex: 1 1 100%;
-        min-height: 44px;
-        justify-content: center;
-        font-size: 0.85rem;
+        pointer-events: auto !important;
+        touch-action: manipulation;
     }
 
     /* Kalender panel responsif pada smartphone */
@@ -2617,11 +2657,12 @@ body {
         padding: 8px 10px;
     }
 
+    .topbar-right-group .btn-topbar-cal,
     .topbar-right-group .btn-topbar-cal-mobile,
-    .topbar-right-group .btn-topbar-auth,
-    .topbar-right-group .btn-topbar-add {
+    .topbar-right-group .btn-topbar-auth {
         font-size: 0.775rem;
         padding: 8px 10px;
+        min-height: 44px;
         gap: 5px;
     }
 

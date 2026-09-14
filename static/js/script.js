@@ -90,40 +90,84 @@ function toggleSidebarDesktop() {
     setSidebarState(!isSidebarOpen);
 }
 
-function toggleSidebarUniversal() {
+function toggleSidebarUniversal(e) {
+    if (e) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
     toggleSidebar();
 }
 
 /**
  * Kontrol Drawer Sidebar untuk layar HP/Tablet
  */
-function closeSidebarMobile() {
+function closeSidebarMobile(e) {
+    if (e) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
     const sidebar = document.getElementById('appSidebar');
     const backdrop = document.getElementById('sidebarBackdrop');
     if (sidebar) sidebar.classList.remove('is-open');
-    if (backdrop) backdrop.classList.remove('is-open');
+    document.body.classList.remove('sidebar-open');
+    if (backdrop) {
+        backdrop.classList.remove('is-open');
+        backdrop.setAttribute('aria-hidden', 'true');
+    }
 }
 
-function openSidebarMobile() {
+function openSidebarMobile(e) {
+    if (e) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
     closeCalendarMobile();
     const sidebar = document.getElementById('appSidebar');
     const backdrop = document.getElementById('sidebarBackdrop');
     if (sidebar) sidebar.classList.add('is-open');
-    if (backdrop) backdrop.classList.add('is-open');
+    document.body.classList.add('sidebar-open');
+    if (backdrop) {
+        backdrop.classList.add('is-open');
+        backdrop.setAttribute('aria-hidden', 'false');
+    }
 }
 
-function toggleSidebarMobile() {
+function toggleSidebarMobile(e) {
+    if (e) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
     const sidebar = document.getElementById('appSidebar');
     if (sidebar && sidebar.classList.contains('is-open')) {
-        closeSidebarMobile();
+        closeSidebarMobile(e);
     } else {
-        openSidebarMobile();
+        openSidebarMobile(e);
     }
 }
 
 /**
  * Kontrol Kalender Panel pada layar kecil (mobile/tablet)
  */
+let lastCalendarToggleTime = 0;
+
+function toggleCalendarUniversal(e) {
+    if (e) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
+    const now = Date.now();
+    if (now - lastCalendarToggleTime < 250) {
+        return;
+    }
+    lastCalendarToggleTime = now;
+
+    if (window.innerWidth <= 1100) {
+        toggleCalendarMobile();
+    } else {
+        setSidebarState(!isSidebarOpen);
+    }
+}
+
 function openCalendarMobile() {
     closeSidebarMobile();
     const calPanel = document.getElementById('calendarPanel');
@@ -132,7 +176,11 @@ function openCalendarMobile() {
 
     if (calPanel) {
         calPanel.classList.add('mobile-cal-open');
-        if (backdrop) backdrop.classList.add('is-open');
+        document.body.classList.add('calendar-open');
+        if (backdrop) {
+            backdrop.classList.add('is-open');
+            backdrop.setAttribute('aria-hidden', 'false');
+        }
         if (calBtn) {
             calBtn.classList.add('is-active');
             calBtn.setAttribute('aria-expanded', 'true');
@@ -141,7 +189,11 @@ function openCalendarMobile() {
     }
 }
 
-function closeCalendarMobile() {
+function closeCalendarMobile(e) {
+    if (e) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
     const calPanel = document.getElementById('calendarPanel');
     const backdrop = document.getElementById('calendarBackdrop');
     const calBtn = document.getElementById('btnCalMobile');
@@ -149,8 +201,10 @@ function closeCalendarMobile() {
     if (calPanel) {
         calPanel.classList.remove('mobile-cal-open');
     }
+    document.body.classList.remove('calendar-open');
     if (backdrop) {
         backdrop.classList.remove('is-open');
+        backdrop.setAttribute('aria-hidden', 'true');
     }
     if (calBtn) {
         calBtn.classList.remove('is-active');
@@ -159,14 +213,28 @@ function closeCalendarMobile() {
     closeCalendarPopover();
 }
 
-function toggleCalendarMobile() {
+function toggleCalendarMobile(e) {
+    if (e) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
     const calPanel = document.getElementById('calendarPanel');
     if (calPanel && calPanel.classList.contains('mobile-cal-open')) {
-        closeCalendarMobile();
+        closeCalendarMobile(e);
     } else {
         openCalendarMobile();
     }
 }
+
+// Ekspos fungsi navigasi ke window agar kompatibel dengan inline onclick & touch
+window.toggleCalendarUniversal = toggleCalendarUniversal;
+window.toggleCalendarMobile = toggleCalendarMobile;
+window.openCalendarMobile = openCalendarMobile;
+window.closeCalendarMobile = closeCalendarMobile;
+window.toggleSidebarUniversal = toggleSidebarUniversal;
+window.toggleSidebar = toggleSidebar;
+window.openSidebarMobile = openSidebarMobile;
+window.closeSidebarMobile = closeSidebarMobile;
 
 /**
  * Inisialisasi preferensi sidebar dari localStorage
@@ -618,7 +686,40 @@ document.addEventListener('DOMContentLoaded', function () {
         deadlineInput.min = today;
     }
 
-    // 7. Mencegah event klik di dalam panel kalender menutup kalender secara tidak sengaja
+    // 7. Event listeners khusus tombol Kalender & Sidebar (kompatibel Android touch)
+    const calBtn = document.getElementById('btnCalMobile');
+    if (calBtn) {
+        calBtn.addEventListener('click', function (e) {
+            toggleCalendarUniversal(e);
+        });
+    }
+
+    const calCloseBtn = document.querySelector('.btn-calendar-close');
+    if (calCloseBtn) {
+        calCloseBtn.addEventListener('click', function (e) {
+            closeCalendarMobile(e);
+        });
+    }
+
+    const calBackdrop = document.getElementById('calendarBackdrop');
+    if (calBackdrop) {
+        calBackdrop.addEventListener('click', function (e) {
+            if (e.target === calBackdrop) {
+                closeCalendarMobile(e);
+            }
+        });
+    }
+
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+    if (sidebarBackdrop) {
+        sidebarBackdrop.addEventListener('click', function (e) {
+            if (e.target === sidebarBackdrop) {
+                closeSidebarMobile(e);
+            }
+        });
+    }
+
+    // 8. Mencegah event klik di dalam panel kalender menutup kalender secara tidak sengaja
     const calPanel = document.getElementById('calendarPanel');
     if (calPanel) {
         calPanel.addEventListener('click', function (e) {
